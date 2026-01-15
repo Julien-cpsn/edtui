@@ -1,6 +1,8 @@
+use crokey::key;
+use edtui::actions::DeleteLine;
+use edtui::events::{KeyCombinationHandler, KeyCombinationRegister};
 use edtui::{
-    actions::SwitchMode,
-    events::{KeyEvent, KeyEventHandler, KeyEventRegister},
+    actions::{MoveWordBackward, MoveWordForward, SwitchMode},
     EditorEventHandler, EditorMode, EditorState, EditorView, Lines,
 };
 use ratatui::{
@@ -26,7 +28,7 @@ fn run(terminal: &mut DefaultTerminal) -> Result<(), Box<dyn Error>> {
             if key.code == KeyCode::Char('c') && key.modifiers == KeyModifiers::CONTROL {
                 break;
             }
-            app.event_handler.on_key_event(key, &mut app.state);
+            app.event_handler.on_key_event(&key.into(), &mut app.state);
         }
     }
     Ok(())
@@ -39,16 +41,31 @@ struct App {
 
 impl App {
     fn new() -> Self {
-        let mut key_handler = KeyEventHandler::vim_mode();
+        let mut key_handler = KeyCombinationHandler::vim_mode();
 
         key_handler.insert(
-            KeyEventRegister::n(vec![KeyEvent::Ctrl('x')]),
+            KeyCombinationRegister::n(vec![key!(ctrl-x)]),
             SwitchMode(EditorMode::Insert),
         );
 
         key_handler.insert(
-            KeyEventRegister::i(vec![KeyEvent::Ctrl('q')]),
+            KeyCombinationRegister::i(vec![key!(ctrl-q)]),
             SwitchMode(EditorMode::Normal),
+        );
+
+        key_handler.insert(
+            KeyCombinationRegister::n(vec![key!(ctrl-left)]),
+            MoveWordBackward(1),
+        );
+
+        key_handler.insert(
+            KeyCombinationRegister::n(vec![key!(ctrl-right)]),
+            MoveWordForward(1),
+        );
+
+        key_handler.insert(
+            KeyCombinationRegister::n(vec![key!(ctrl-alt-d)]),
+            DeleteLine(1),
         );
 
         Self {

@@ -17,25 +17,21 @@ const SCROLL_LINES: usize = 1;
 pub struct MouseEventHandler {}
 
 impl MouseEventHandler {
-    pub fn on_event<E>(event: E, state: &mut EditorState)
-    where
-        E: Into<MouseEvent>,
-    {
-        let event = event.into();
-        if event == MouseEvent::None {
+    pub fn on_event(event: &MouseEvent, state: &mut EditorState) {
+        if event == &MouseEvent::None {
             return;
         }
 
         // Handle scroll events
         match event {
             MouseEvent::ScrollUp(mouse) => {
-                if Self::is_position_within_bounds(&mouse, state) {
+                if Self::is_position_within_bounds(mouse, state) {
                     Self::handle_scroll_up(state);
                 }
                 return;
             }
             MouseEvent::ScrollDown(mouse) => {
-                if Self::is_position_within_bounds(&mouse, state) {
+                if Self::is_position_within_bounds(mouse, state) {
                     Self::handle_scroll_down(state);
                 }
                 return;
@@ -44,7 +40,7 @@ impl MouseEventHandler {
         }
 
         // Check if the mouse event is within the editor's screen area
-        if !Self::is_within_bounds(&event, state) {
+        if !Self::is_within_bounds(event, state) {
             return;
         }
 
@@ -65,7 +61,7 @@ impl MouseEventHandler {
         match event {
             MouseEvent::Down(mouse) | MouseEvent::Up(mouse) | MouseEvent::Drag(mouse) => {
                 let lines = &state.lines;
-                let cursor = mouse_position_to_cursor_position(state, &mouse, state.view.tab_width);
+                let cursor = mouse_position_to_cursor_position(state, mouse, state.view.tab_width);
                 let last_row = lines.last_row_index();
                 let last_col = lines.last_col_index(cursor.row);
 

@@ -46,14 +46,15 @@
 //!
 //! Or customize keybindings:
 //! ```ignore
-//! use edtui::{KeyEventHandler, KeyEventRegister, EditorEventHandler};
+//! use corkey::key;
+//! use edtui::{KeyCombinationHandler, KeyCombinationRegister, EditorCombinationHandler};
 //!
-//! let mut key_handler = KeyEventHandler::vim_mode();
+//! let mut key_handler = KeyCombinationHandler::vim_mode();
 //! key_handler.insert(
-//!     KeyEventRegister::n(vec![KeyEvent::Ctrl('x')]),
+//!     KeyCombinationRegister::n(vec![KeyCombination::Ctrl('x')]),
 //!     SwitchMode(EditorMode::Insert),
 //! );
-//! let event_handler = EditorEventHandler::new(key_handler);
+//! let event_handler = EditorCombinationHandler::new(key_handler);
 //! ```
 //!
 //! ## Demo
@@ -302,7 +303,6 @@ mod state;
 mod view;
 
 #[allow(deprecated)]
-pub use events::deprecated_input::EditorInput;
 pub use events::EditorEventHandler;
 pub use state::{mode::EditorMode, EditorState};
 pub use view::{theme::EditorTheme, EditorStatusLine, EditorView, LineNumbers};

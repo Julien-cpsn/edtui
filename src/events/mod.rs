@@ -1,11 +1,10 @@
-pub(crate) mod deprecated_input;
 mod key;
 #[cfg(feature = "mouse-support")]
 pub(crate) mod mouse;
 pub(crate) mod paste;
 
-pub use key::{KeyEvent, KeyEventHandler, KeyEventRegister};
-
+pub use crate::events::key::{KeyCombinationHandler, KeyCombinationRegister};
+pub use crokey::KeyCombination;
 #[cfg(feature = "mouse-support")]
 pub use mouse::{MouseEvent, MouseEventHandler};
 
@@ -15,7 +14,7 @@ use crossterm::event::Event as CTEvent;
 /// Handles key and mouse events.
 #[derive(Clone)]
 pub struct EditorEventHandler {
-    pub key_handler: KeyEventHandler,
+    pub key_handler: KeyCombinationHandler,
 }
 
 impl Default for EditorEventHandler {
@@ -27,7 +26,7 @@ impl Default for EditorEventHandler {
 impl EditorEventHandler {
     /// Creates a new `EditorEvent` handler with the given key handler.
     #[must_use]
-    pub fn new(key_handler: KeyEventHandler) -> Self {
+    pub fn new(key_handler: KeyCombinationHandler) -> Self {
         Self { key_handler }
     }
 
@@ -35,7 +34,7 @@ impl EditorEventHandler {
     #[must_use]
     pub fn vim_mode() -> Self {
         Self {
-            key_handler: KeyEventHandler::vim_mode(),
+            key_handler: KeyCombinationHandler::vim_mode(),
         }
     }
 
@@ -43,39 +42,30 @@ impl EditorEventHandler {
     #[must_use]
     pub fn emacs_mode() -> Self {
         Self {
-            key_handler: KeyEventHandler::emacs_mode(),
+            key_handler: KeyCombinationHandler::emacs_mode(),
         }
     }
 
     /// Handles key and mouse events.
-    pub fn on_event<T>(&mut self, event: T, state: &mut EditorState)
-    where
-        T: Into<Event>,
-    {
-        match event.into() {
+    pub fn on_event(&mut self, event: &Event, state: &mut EditorState) {
+        match event {
             Event::Key(event) => self.on_key_event(event, state),
             #[cfg(feature = "mouse-support")]
             Event::Mouse(event) => self.on_mouse_event(event, state),
-            Event::Paste(text) => self.on_paste_event(text, state),
+            Event::Paste(text) => self.on_paste_event(text.to_owned(), state),
             Event::None => (),
         }
     }
 
     /// Handles key events.
-    pub fn on_key_event<T>(&mut self, event: T, state: &mut EditorState)
-    where
-        T: Into<KeyEvent>,
-    {
-        self.key_handler.on_event(event.into(), state);
+    pub fn on_key_event(&mut self, event: &KeyCombination, state: &mut EditorState) {
+        self.key_handler.on_event(event, state);
     }
 
     #[cfg(feature = "mouse-support")]
     /// Handles mouse events.
-    pub fn on_mouse_event<T>(&self, event: T, state: &mut EditorState)
-    where
-        T: Into<MouseEvent>,
-    {
-        MouseEventHandler::on_event(event.into(), state);
+    pub fn on_mouse_event(&self, event: &MouseEvent, state: &mut EditorState) {
+        MouseEventHandler::on_event(event, state);
     }
 
     /// Handles paste events.
@@ -85,7 +75,7 @@ impl EditorEventHandler {
 }
 
 pub enum Event {
-    Key(KeyEvent),
+    Key(KeyCombination),
     #[cfg(feature = "mouse-support")]
     Mouse(MouseEvent),
     Paste(String),

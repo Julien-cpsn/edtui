@@ -74,7 +74,7 @@ impl App {
 
         self.context
             .event_handler
-            .on_event(event, &mut self.context.state);
+            .on_event(&event.into(), &mut self.context.state);
 
         Ok(())
     }

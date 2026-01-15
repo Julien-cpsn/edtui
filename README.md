@@ -46,14 +46,15 @@ event_handler.on_key_event(key_event, &mut state);
 
 Or customize keybindings:
 ```rust
-use edtui::{KeyEventHandler, KeyEventRegister, EditorEventHandler};
+use crokey::key;
+use edtui::{KeyCombinationHandler, KeyCombinationRegister, EditorCombinationHandler};
 
-let mut key_handler = KeyEventHandler::vim_mode();
+let mut key_handler = KeyCombinationHandler::vim_mode();
 key_handler.insert(
-    KeyEventRegister::n(vec![KeyEvent::Ctrl('x')]),
+    KeyCombinationRegister::n(vec![key!(ctrl-x)]),
     SwitchMode(EditorMode::Insert),
 );
-let event_handler = EditorEventHandler::new(key_handler);
+let event_handler = EditorCombinationHandler::new(key_handler);
 ```
 
 ### Demo
